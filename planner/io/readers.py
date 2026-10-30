@@ -21,6 +21,7 @@ from pathlib import Path
 from typing import Any, Protocol
 
 from planner.domain.models import Dataset, Order, Vehicle, World
+from planner.domain.parsing import DatasetError
 
 #: Dataset file stems; every stem must be present, in a single format.
 _FILE_STEMS: tuple[str, ...] = ("mundo", "pedidos", "vehiculos")
@@ -43,10 +44,6 @@ _WORLD_INT_FIELDS: Mapping[str, str] = {
 
 _WORLD_KNOWN_KEYS: frozenset[str] = frozenset(_WORLD_INT_FIELDS) | {"hora_salida"}
 _ORDER_KNOWN_KEYS: frozenset[str] = frozenset({"id", "x", "y", "peso"})
-
-
-class DatasetError(Exception):
-    """A dataset is unreadable or invalid; the message names the fix."""
 
 
 class DatasetReader(Protocol):

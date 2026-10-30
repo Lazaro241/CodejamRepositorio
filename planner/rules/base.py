@@ -76,6 +76,10 @@ class RuleSet:
         Reads `registry.REGISTRY` through the module at call time (not an
         import-time copy) so tests can monkeypatch the registry in isolation.
         """
+        from planner.rules.premium import PremiumRule
+
+        if PremiumRule not in rule_registry.REGISTRY:
+            rule_registry.register(PremiumRule)
         active: list[Rule] = []
         for rule_type in rule_registry.REGISTRY:
             rule = rule_type()
