@@ -8,8 +8,6 @@ hand-built worlds and plans (no fixture files needed).
 
 from __future__ import annotations
 
-from planner.simulation.simulator import simulate
-
 from planner.domain.models import Dataset, Order, Plan, Vehicle, World
 from planner.simulation.objective import (
     DEFAULT_TERMS,
@@ -17,6 +15,7 @@ from planner.simulation.objective import (
     SimulationStats,
     default_objective,
 )
+from planner.simulation.simulator import simulate
 
 
 def _world(**overrides: int) -> World:
@@ -32,7 +31,19 @@ def _world(**overrides: int) -> World:
         "cost_per_failure": 200,
     }
     values.update(overrides)
-    return World(values["width"], values["height"], (0, 0), 480, **values)
+    return World(
+        width=values["width"],
+        height=values["height"],
+        depot=(0, 0),
+        departure=480,
+        service_time=values["service_time"],
+        load_time=values["load_time"],
+        minutes_per_block=values["minutes_per_block"],
+        cost_per_block=values["cost_per_block"],
+        cost_per_vehicle=values["cost_per_vehicle"],
+        cost_per_minute=values["cost_per_minute"],
+        cost_per_failure=values["cost_per_failure"],
+    )
 
 
 def _dataset(world: World, orders: list[Order], vehicles: list[str]) -> Dataset:
