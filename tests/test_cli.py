@@ -9,6 +9,7 @@ from pathlib import Path
 from planner.cli import main
 from planner.domain.models import Plan
 from planner.io import read_dataset
+from planner.rules.base import Rule, RuleSet
 from planner.simulation import simulate
 
 FIXTURES = Path(__file__).resolve().parent / "fixtures"
@@ -101,4 +102,43 @@ def test_cli_rejects_an_invalid_solver_plan_without_writing(monkeypatch, tmp_pat
     monkeypatch.setattr(cli, "Orchestrator", InvalidSolver)
 
     assert main([str(dataset_path), "-o", str(output)]) == 2
+    assert not output.exists()
+
+
+def test_cli_keeps_rule_check_violations_informational(monkeypatch, tmp_path: Path, caplog) -> None:
+    from planner import cli
+
+    class ReportingRule(Rule):
+        name = "reporting"
+
+        def check(self, vehicle, stops, ds) -> list[str]:
+            return ["aviso de prueba"]
+
+    dataset_path = _make_dataset(tmp_path / "dataset", depot=(10, 10))
+    output = tmp_path / "plan.json"
+    monkeypatch.setattr(cli.RuleSet, "from_dataset", lambda dataset: RuleSet((ReportingRule(),)))
+
+    assert main([str(dataset_path), "-o", str(output), "--budget", "0.01"]) == 0
+    assert output.exists()
+    assert "aviso de prueba" in caplog.text
+
+
+def test_cli_rejects_invalid_expanded_route_before_writing(monkeypatch, tmp_path: Path) -> None:
+    from planner import cli
+
+    class InvalidExpansion(Rule):
+        name = "invalid_expansion"
+
+        def expand(self, vehicle, route, ds) -> tuple[int | str, ...]:
+            return (*route, 999)
+
+    dataset_path = _make_dataset(tmp_path / "dataset", depot=(10, 10))
+    output = tmp_path / "invalid-expanded.json"
+    monkeypatch.setattr(
+        cli.RuleSet,
+        "from_dataset",
+        classmethod(lambda cls, dataset: RuleSet((InvalidExpansion(),))),
+    )
+
+    assert main([str(dataset_path), "-o", str(output), "--budget", "0.01"]) == 2
     assert not output.exists()
