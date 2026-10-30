@@ -10,6 +10,7 @@ from __future__ import annotations
 from collections.abc import Sequence
 
 from planner.domain.models import Dataset, Order, Plan, Vehicle, World
+from planner.rules.base import Rule
 from planner.simulation import simulate
 
 _WORLD = World(
@@ -115,8 +116,13 @@ def test_empty_plan_makespan_is_zero_and_all_fail() -> None:
     }
 
 
-class _RuleEveryTwoStops:
-    """Fake rule (T4 preview): insert DEPOSITO after every 2 order stops."""
+class _RuleEveryTwoStops(Rule):
+    """Fake rule: insert DEPOSITO after every 2 order stops.
+
+    Since T4 wires the full rule interface in `simulate`, it inherits the
+    neutral defaults (`applies`/`check`/`extra_cost`/`assignable`) from the
+    protocol instead of remaining the T3 duck-typed slice.
+    """
 
     name = "fake"
 

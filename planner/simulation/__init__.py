@@ -2,8 +2,9 @@
 
 Public surface per docs/03-arquitectura.md; this package is the single source
 of truth for costs (`docs/AGENTS.md`) — solvers call `simulate`, never
-reimplement it. It imports only stdlib + `planner.domain` (+ validator) and
-stays duck-typed about rules until T4 formally lands `planner.rules`.
+reimplement it. It imports only stdlib, `planner.domain` and
+`planner.rules.base` (the final dependency arrow), and rules are consumed
+through `RuleSet` since T4.
 """
 
 from __future__ import annotations
