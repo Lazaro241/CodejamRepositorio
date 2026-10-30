@@ -10,7 +10,7 @@ from pathlib import Path
 
 from planner.io import DatasetError, read_dataset, write_plan
 from planner.rules.base import RuleSet
-from planner.simulation import simulate, validate
+from planner.simulation import simulate, validate, validate_routes
 from planner.solvers.base import SolveContext
 from planner.solvers.orchestrator import Orchestrator
 
@@ -58,12 +58,23 @@ def main(argv: Sequence[str] | None = None) -> int:
             logging.getLogger(__name__).error("Plan inválido: %s", "; ".join(errors))
             return 2
 
-        evaluation = simulate(dataset, plan, rules)
-        if evaluation.violations:
+        vehicles = {vehicle.id: vehicle for vehicle in dataset.vehicles}
+        expanded_routes = {
+            vehicle_id: rules.expand(vehicles[vehicle_id], route, dataset)
+            for vehicle_id, route in plan.routes.items()
+        }
+        errors = validate_routes(dataset, expanded_routes)
+        if errors:
             logging.getLogger(__name__).error(
-                "Plan inválido tras aplicar reglas: %s", "; ".join(evaluation.violations)
+                "Plan inválido tras aplicar reglas: %s", "; ".join(errors)
             )
             return 2
+
+        evaluation = simulate(dataset, plan, rules)
+        if evaluation.violations:
+            logging.getLogger(__name__).warning(
+                "Advertencias de reglas: %s", "; ".join(evaluation.violations)
+            )
 
         output_path = Path(args.output)
         output_path.parent.mkdir(parents=True, exist_ok=True)
