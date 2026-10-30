@@ -12,7 +12,10 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import dataclass, field
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from planner.simulation.timeline import Delivery
 
 # Choice: `extra` defaults to a plain `{}` via default_factory. A module-level
 # `MappingProxyType({})` default is rejected by dataclasses (mappingproxy is
@@ -110,3 +113,4 @@ class Evaluation:
     breakdown: Mapping[str, int]
     unserved: tuple[int, ...]
     violations: tuple[str, ...]
+    timeline: tuple[Delivery, ...] = field(default=(), compare=False, repr=False)

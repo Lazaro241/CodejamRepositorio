@@ -27,6 +27,7 @@ from planner.domain.geometry import manhattan
 from planner.domain.models import Dataset, Evaluation, Plan
 from planner.rules.base import Rule, RuleSet, as_ruleset
 from planner.simulation.objective import SimulationStats, default_objective
+from planner.simulation.timeline import Delivery
 from planner.simulation.validator import DEPOSITO, validate_routes
 
 
@@ -59,6 +60,7 @@ def simulate(dataset: Dataset, plan: Plan, rules: RuleSet | Iterable[Rule] | Non
     used_vehicles = 0
     finish = dataset.world.departure
     delivered: set[int] = set()
+    timeline: list[Delivery] = []
     rule_violations: list[str] = []
     for vehicle in dataset.vehicles:
         stops = expanded.get(vehicle.id, ())
@@ -69,10 +71,13 @@ def simulate(dataset: Dataset, plan: Plan, rules: RuleSet | Iterable[Rule] | Non
             # checks only ride along on routes that are actually driven.
             continue
         used_vehicles += 1
-        route_blocks, route_finish, route_delivered = _drive(dataset, stops)
+        route_blocks, route_finish, route_delivered, route_timeline = _drive(
+            dataset, vehicle.id, stops
+        )
         blocks += route_blocks
         finish = max(finish, route_finish)
         delivered.update(route_delivered)
+        timeline.extend(route_timeline)
         rule_violations.extend(ruleset.check(vehicle, stops, dataset))
 
     # Official `no_asignados`: dataset orders the plan never mentions, in
@@ -90,6 +95,7 @@ def simulate(dataset: Dataset, plan: Plan, rules: RuleSet | Iterable[Rule] | Non
         breakdown=breakdown,
         unserved=unserved,
         violations=(),
+        timeline=tuple(timeline),
     )
 
     rule_terms = ruleset.extra_breakdown(base_evaluation, dataset)
@@ -111,6 +117,7 @@ def simulate(dataset: Dataset, plan: Plan, rules: RuleSet | Iterable[Rule] | Non
         breakdown=merged_breakdown,
         unserved=unserved,
         violations=tuple(rule_violations),
+        timeline=tuple(timeline),
     )
 
 
@@ -138,8 +145,10 @@ def _apply_rules(
     return expanded
 
 
-def _drive(dataset: Dataset, stops: Sequence[int | str]) -> tuple[int, int, set[int]]:
-    """Simulate one used route: returns (blocks, finish time, delivered ids).
+def _drive(
+    dataset: Dataset, vehicle_id: str, stops: Sequence[int | str]
+) -> tuple[int, int, set[int], tuple[Delivery, ...]]:
+    """Simulate a route and collect the delivery timestamps needed by rules.
 
     Time math stays in integer minutes like the official simulator. Every
     remaining stop is an order id (validate_routes cleared anything else), so
@@ -150,6 +159,7 @@ def _drive(dataset: Dataset, stops: Sequence[int | str]) -> tuple[int, int, set[
     clock = world.departure
     blocks = 0
     delivered: set[int] = set()
+    timeline: list[Delivery] = []
     for stop in stops:
         if stop == DEPOSITO:
             # RECARGA: back to the depot, pay the trip, then the load time; a
@@ -164,14 +174,17 @@ def _drive(dataset: Dataset, stops: Sequence[int | str]) -> tuple[int, int, set[
         blocks += leg
         clock += leg * world.minutes_per_block
         position = (order.x, order.y)
+        start = clock - world.departure
+        end = start + world.service_time
         clock += world.service_time  # ENTREGADO: occupied from arrival onwards
         delivered.add(stop)
+        timeline.append(Delivery(vehicle_id, stop, start, end))
     # REGRESO: the implicit final return is real distance and real time (the
     # official simulator adds both), but carries no load time.
     leg = manhattan(position, world.depot)
     blocks += leg
     clock += leg * world.minutes_per_block
-    return blocks, clock, delivered
+    return blocks, clock, delivered, tuple(timeline)
 
 
 __all__ = ["simulate"]
