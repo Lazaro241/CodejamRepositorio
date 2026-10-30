@@ -33,3 +33,6 @@ Con cada evento llegan reglas nuevas y un simulador nuevo (`git pull`): **diseñ
 
 ## Reglas futuras probables (diseñar para ellas, no implementarlas hasta que se pidan)
 Capacidad de vehículo (los pedidos ya traen `peso`; en la práctica van de 1 a 20 y suman 455), múltiples viajes con `DEPOSITO`, ventanas horarias, prioridades, vehículos heterogéneos, fallas de vehículos.
+
+## Eventos incorporados
+- **Evento 1 (premium)**: pedidos con `premium` (bool, falso si falta) y mundo con `costo_por_minuto_premium` (def. 1). El costo suma `costo_por_minuto_premium × Σ minutos desde hora_salida hasta que empieza la entrega de cada premium entregado`. Detalle e implementación en `docs/07-evento-1-premium.md`.
