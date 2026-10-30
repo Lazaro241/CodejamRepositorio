@@ -1,0 +1,26 @@
+# quickdrop-planner: package config. The name avoids the official `quickdrop` simulator.
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "quickdrop-planner"
+version = "0.1.0"
+description = "Delivery plan solver for the QuickDrop simulator (stdlib only)."
+requires-python = ">=3.11"
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest", "ruff"]
+
+[tool.setuptools.packages.find]
+include = ["planner*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+# docs/ holds spec snippets with an intentional layout, not formatted code.
+extend-exclude = ["docs"]

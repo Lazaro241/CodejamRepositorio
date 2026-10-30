@@ -1,0 +1,16 @@
+# Generated plans and evaluation datasets (docs/05-convenciones.md, Git)
+out/
+datos/entrega*/
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+
+# Virtualenvs and tool caches
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
