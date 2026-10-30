@@ -9,11 +9,12 @@ Se evalúa con datasets ocultos y las reglas **cambian durante la jornada**. Por
 3. `docs/03-arquitectura.md` — capas, carpetas y reglas de dependencia.
 4. `docs/04-patrones.md` — qué patrón usar y dónde (y cuándo NO).
 5. `docs/05-convenciones.md` — estilo, tests, Git.
-La tarea concreta está en `docs/06-tareas.md`. Hacé **solo** la tarea que te piden.
+La tarea concreta está en `docs/06-tareas.md` (base) o `docs/07-evento-1-premium.md` (Evento 1: premium). Hacé **solo** la tarea que te piden.
 
 ## Reglas innegociables
 - **Nada hardcodeado del dataset**: depósito, costos, velocidad, tiempos, hora de salida, tamaño de grilla y cantidad de pedidos/vehículos salen de los archivos. Prohibido suponer depósito en (0,0), grilla 20x20, 40 pedidos, 5 vehículos o ids `V1..Vn`.
 - **Los datos de práctica son un ejemplo, no el contrato**: el contrato es `docs/02-formato-datos.md` (campos opcionales pueden faltar, venir `null` o vacíos; campos desconocidos se ignoran).
+- **Cada etapa se evalúa con todas las reglas anteriores**: un dataset sin los campos de una regla nueva debe dar el mismo plan y costo que antes (test de no regresión obligatorio).
 - **Hoy los vehículos no tienen capacidad** (solo `id`) y `peso` de los pedidos no limita nada. No inventes una capacidad. El peso se carga y se conserva para reglas futuras.
 - **Dominio puro**: `planner/domain` no importa de `io`, `solvers`, `rules`, `simulation` ni `cli`.
 - **Una sola fuente de verdad del costo**: `simulation/` (réplica del simulador oficial). Los solvers lo usan, no lo reimplementan.
