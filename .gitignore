@@ -1,6 +1,7 @@
 # Generated plans and evaluation datasets (docs/05-convenciones.md, Git)
 out/
 datos/entrega*/
+datasets/
 
 # Python artifacts
 __pycache__/
