@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 
 
@@ -11,9 +13,11 @@ def test_package_imports() -> None:
     import planner.cli  # noqa: F401
 
 
-def test_cli_stub_exits_zero(capsys: pytest.CaptureFixture[str]) -> None:
+def test_cli_runs_pipeline(capsys: pytest.CaptureFixture[str], tmp_path: Path) -> None:
     from planner.cli import main
 
-    # The stub only prints and exits 0, whatever the dataset folder is.
-    assert main(["tests/fixtures/practica_n23"]) == 0
-    assert capsys.readouterr().out.strip() == "no implementado"
+    fixture = Path(__file__).parent / "fixtures" / "practica_n23"
+    output = tmp_path / "plan.json"
+    assert main([str(fixture), "-o", str(output), "--budget", "0.02"]) == 0
+    assert output.exists()
+    assert "Costo total:" in capsys.readouterr().out
