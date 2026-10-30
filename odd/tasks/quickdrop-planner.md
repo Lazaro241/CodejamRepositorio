@@ -38,7 +38,7 @@ pyproject.toml; use PYTHONPATH or run with cwd there for parity runs).
 
 ## Todo (ordered)
 - [x] T0 scaffold — branch feat/scaffold: package skeleton, pyproject (py>=3.11, extras dev: pytest, ruff), .gitignore, __main__/cli stub ("no implementado"), version fixture+docs, smoke test. Acceptance: pip install -e .[dev], pytest -q, python -m planner --help. Route: delegated writer.
-- [ ] T1 domain — feat/domain: models.py + geometry.py per 03-arquitectura.md contracts, frozen dataclasses, tests.
+- [x] T1 domain — feat/domain: models.py + geometry.py per 03-arquitectura.md contracts, frozen dataclasses, tests.
 - [ ] T2 io — feat/io: readers (Json/Csv + detect_reader), writers, DatasetError; tests incl. JSON==CSV equivalence on practica_n23 (40 orders, 5 vehicles V1..V5, depot (0,0), departure 480, sum weights 455).
 - [ ] T3 simulation — feat/simulation: simulate/objective/validator; parity tests (case 2641 documented; practica_n23 cost vs official sim via ../quickdrop-sim). Depends T1.
 - [ ] T4 rules-base — feat/rules-base: Rule Protocol, RuleSet, registry; integrated into simulate; fake-rule tests. Depends T3.
@@ -57,3 +57,4 @@ python -m quickdrop simular tests/fixtures/practica_n23 out/plan.json (run from 
 - 2026-10-30: feature doc created; plan: sequential tasks, merge each to main.
 - 2026-10-30: T0 delegated to general writer (feat/scaffold).
 - 2026-10-30 T0 scaffold done on feat/scaffold, commits: 72aa5e8 (docs), 208188a (fixture), + scaffold commit (this one). Verified: pip install -e .[dev] OK, pytest -q 2 passed, python -m planner --help OK, ruff check . clean, ruff format --check . clean, stub prints "no implementado".
+- 2026-10-30 T1 domain done on feat/domain, commits: 71fc16a (models), d56b01c (geometry), 17cf6db (tests). Verified: pytest -q 22 passed, ruff check . clean, ruff format --check . clean, domain imports only stdlib (grep verified). Note: `extra` default is `field(default_factory=dict)` (dataclasses reject unhashable MappingProxyType default); read-only enforced by Mapping hint + frozen contract. Branch stays open, orchestrator merges.
